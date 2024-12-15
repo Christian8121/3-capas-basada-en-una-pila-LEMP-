@@ -99,4 +99,74 @@ end
 
 ```
 
+## 4. Configuración de la Infraestructura
+A continuación, se detallan los scripts de aprovisionamiento para cada máquina virtual.
+
+### Balanceador de Carga (Nginx)
+El balanceador distribuye las solicitudes entre los servidores web. El archivo provision_balanceador.sh configura Nginx para balancear la carga:
+
+```
+#!/bin/bash
+
+# Actualizar el sistema
+sudo apt update -y && sudo apt upgrade -y
+
+# Instalar Nginx
+sudo apt install -y nginx
+
+# Configuración básica de Nginx como balanceador de carga
+cat > /etc/nginx/sites-available/owncloud << EOF
+upstream servidoresweb {
+    server 192.168.56.21;
+    server 192.168.56.22;
+}
+
+server {
+   listen      80;
+   server_name balanceadorSeverino;
+
+   location / {
+       proxy_redirect      off;
+       proxy_set_header    X-Real-IP \$remote_addr;
+       proxy_set_header    X-Forwarded-For \$proxy_add_x_forwarded_for;
+       proxy_set_header    Host \$http_host;
+       proxy_pass          http://servidoresweb;
+   }
+}
+EOF
+
+# Activar la configuración
+sudo ln -s /etc/nginx/sites-available/owncloud /etc/nginx/sites-enabled/
+
+# Instalar UFW si no está instalado
+if ! command -v ufw &> /dev/null; then
+    sudo apt install -y ufw
+fi
+
+# Configuración inicial del firewall: Permitir SSH
+sudo ufw allow ssh
+
+# Establecer políticas predeterminadas para denegar todas las conexiones entrantes y permitir las salientes
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# Permitir el puerto 80 con persistencia
+sudo ufw allow 80/tcp
+
+# Habilitar el firewall
+sudo ufw --force enable
+
+# Reiniciar Nginx
+sudo systemctl restart nginx
+sudo systemctl enable nginx
+```
+
+![image](https://github.com/user-attachments/assets/c0e61c30-19a1-4406-b313-6a136f68d9fa)
+
+### El estado de Nginx
+![image](https://github.com/user-attachments/assets/aade548b-c3ed-4c92-a06e-ce619ca2c19e)
+![image](https://github.com/user-attachments/assets/03f17e2a-bd10-46d3-bd26-879a52230a57)
+
+
+
 
