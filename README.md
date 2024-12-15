@@ -29,3 +29,6 @@ Servidor NFS y PHP-FPM: Este servidor proporciona el sistema de archivos compart
 
 * Capa 3 - Base de Datos:
 Servidor MariaDB: Gestiona la base de datos de OwnCloud.
+
+![Diagrama en blanco (2)](https://github.com/user-attachments/assets/eb3a9431-b25a-439f-ad4d-02f9251e8db6)
+
