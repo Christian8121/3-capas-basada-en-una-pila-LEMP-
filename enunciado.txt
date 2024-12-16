@@ -1,0 +1,49 @@
+Se trata de desplegar un CMS (OwnCloud o Jooma, a elegir por el alumno)  en una infraestructura en alta disponibilidad de 3 capas basada en una pila LEMP con la siguiente estructura:
+
+Capa 1: Expuesta a red pública. Una máquina con balanceador de carga Nginx. (Nombre máquina balanceadorTuNombre).
+Capa 2: BackEnd. 
+Dos máquinas con un servidor web nginx cada una. (serverweb1TuNombre y serverweb2TuNombre).
+Una máquina con un servidor NFS y motor PHP-FPM (serverNFSTuNombre).
+Capa 3: Datos. Base de datos MariaDB (serverdatosTuNombre).
+Las capas 2 y 3 no estarán expuestas a red pública. Los servidores web utilizarán carpeta compartida por NFS desde el serverNFS y además utilizarán el motor PHP-FPM instalado es la misma máquina que el servicio NFS.
+
+El aprovisionamiento de todas las máquinas se llevará a cabo a través de ficheros de provisionamiento.
+
+Toda la infraestructura se despliegará en local utilizando Vagrant (box debian) + VirtualBox.
+
+Habrá que hacer una mínima personalización del CMS.
+
+Se entregará:
+
+Enlace a repostorio GitHub con el proyecto, que contedrá.
+Documento técnico Readme.md.
+Fichero vagranfile.
+Ficheros de provisionamiento.
+Screencash visualizando el funcionamiento de la aplicación.
+Requisitos IMPRESCINDIBLES para la entrega:
+
+Documento técnico. Contendrá:
+Índice.
+Introducción, explicando que se va a realizar y sobre qué infraestructura, explicando el direccionamiento IP utilizado.
+Explicación paso a paso de todas las instalaciones y configuraciones a realizar, incluyendo imágenes y código cuando sea necesario.
+Imprescindible: No puede contener faltas de ortografía y se debe cuidar la redacción.
+Screencash: un solo vídeo en el que se grabará la pantalla realizando las siguientes acciones, en el mismo orden:
+Mostrar estado de las máquinas: vagrant status.
+Ping cada máquina a todas las demás.
+Sistemas de archivos montados en los servidores web: df -h en cada servidor web.
+Acceso a servidor MariaDB desde las máquinas serverweb1 y serverweb2.
+Acceso a Wordpress desde la máquina anfitriona (Windows) y el puerto mapeado.
+Mostrar el fichero /var/log/nginx/access.log en el balanceador de carga.
+Mostrar el fichero /var/log/nginx/access.log en los servidores web.
+Para el servidor web serverweb1 y volver a acceder a wordpress desde la máquina anfitriona.
+Mostrar el fichero /var/log/nginx/access.log en los servidores web.
+ 
+
+Recursos:
+
+Balanceo de Carga con Nginx. 
+ENTREGA OPCIONAL
+
+Un punto crítico en nuestra infraestructura es la capa de datos, puesto que en caso de fallo del servidor no tenemos ni réplica de los datos. Se propone como práctica adicional montar un clúster MariaDB que permita tener replicada nuestra base de datos en dos servidores. Además, habrá que montar un balanceador de base de datos que balancee las solicitudes a ambos servidores.
+
+En caso de llevar a cabo esta implementación, se debe añadir al documento técnico y screencash el contenido que se considere.
