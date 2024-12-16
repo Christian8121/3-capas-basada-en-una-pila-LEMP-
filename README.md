@@ -296,3 +296,206 @@ mysql -u "$USER" -p -h "$IPDB"  -e "SHOW DATABASES;"
   
 ![image](https://github.com/user-attachments/assets/fb565ede-7832-49f5-af45-859b355de184)
 
+### 3. Servidor NFS y PHP-FPM
+El servidor NFS permite compartir el directorio de datos entre los servidores web, mientras que PHP-FPM es necesario para ejecutar el CMS:
+
+```
+#!/bin/bash
+
+# Actualizar el sistema
+sudo apt update -y && sudo apt upgrade -y
+
+# Instalar dependencias necesarias para agregar el repositorio de PHP
+sudo apt install -y lsb-release apt-transport-https ca-certificates wget bzip2
+
+# Agregar el repositorio de PHP 7.4
+sudo wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/php.list
+
+# Actualizar la lista de paquetes después de agregar el nuevo repositorio
+sudo apt update
+
+# Instalar NFS y PHP-FPM con versión 7.4
+sudo apt install -y nfs-kernel-server nfs-common php7.4-fpm php7.4-imagick php7.4-common php7.4-curl php7.4-gd php7.4-intl php7.4-json php7.4-ldap php7.4-mbstring php7.4-mysql php7.4-pgsql php7.4-ssh2 php7.4-sqlite3 php7.4-xml php7.4-zip
+
+# Crear y exportar el directorio compartido
+sudo mkdir -p /var/nfs/shared/
+sudo chown -R www-data:www-data /var/nfs/shared/
+
+# Ajustar permisos después de descomprimir
+sudo chmod -R 775 /var/nfs/shared/ # Permitir lectura y escritura para el grupo
+# Eliminar la entrada existente si esté presente
+if grep -q "/var/nfs/shared" /etc/exports; then
+    echo "Eliminando la entrada existente en /etc/exports..."
+    sudo sed -i.bak "/\/var\/nfs\/shared/d" /etc/exports
+fi
+
+# Agregar la nueva entrada al archivo /etc/exports
+EXPORT_ENTRY="/var/nfs/shared 192.168.56.0/24(rw,sync,no_root_squash,no_subtree_check)"
+echo "$EXPORT_ENTRY" | sudo tee -a /etc/exports
+
+# Actualizar las exportaciones de NFS
+sudo exportfs -a
+
+# Descargar e instalar OwnCloud
+OWNCLOUD_TAR="owncloud-complete-latest.tar.bz2"
+if ! wget -q "https://download.owncloud.com/server/stable/$OWNCLOUD_TAR"; then
+    echo "Error al descargar OwnCloud."
+    exit 1
+fi
+
+# Verificar si el archivo se descargó correctamente antes de descomprimir
+if [ ! -f "$OWNCLOUD_TAR" ]; then
+    echo "El archivo $OWNCLOUD_TAR no se encontró."
+    exit 1
+fi
+
+# Descomprimir el archivo tar.bz2 en la carpeta correcta
+if ! sudo tar -xjf "$OWNCLOUD_TAR" -C /var/nfs/shared/; then
+    echo "Error al descomprimir OwnCloud."
+    exit 1
+fi
+
+# Instalar UFW si no esté instalado
+if ! command -v ufw &> /dev/null; then
+    sudo apt install -y ufw
+fi
+
+# Configuración inicial del firewall: Permitir SSH
+sudo ufw allow ssh
+
+# Establecer políticas predeterminadas para denegar todas las conexiones entrantes y permitir las salientes
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# Permitir el puerto 2049 para NFS con persistencia
+sudo ufw allow 2049/tcp
+
+# Habilitar el firewall automáticamente sin confirmación
+sudo ufw --force enable
+
+# Reiniciar servicios NFS y PHP-FPM
+if ! sudo systemctl restart nfs-kernel-server; then
+    echo "Error al reiniciar NFS, verifica si está instalado correctamente."
+    exit 1
+fi
+
+sudo systemctl enable nfs-kernel-server
+
+if ! sudo systemctl restart php7.4-fpm; then
+    echo "Error al reiniciar PHP-FPM, verifica si está instalado correctamente."
+    exit 1
+fi
+
+sudo systemctl enable php7.4-fpm
+
+echo "Instalación de OwnCloud completada con éxito."
+
+# En caso de querer reestablecer el owncloud y crear un nuevo admin
+# sudo rm /var/nfs/shared/owncloud/config/config.php
+
+```
+
+![image](https://github.com/user-attachments/assets/cfa0e21b-a22c-46b7-9b7f-710c3c86dbf2)
+
+### 4. Servidor MariaDB
+MariaDB se configura en el servidor de base de datos para crear la base de datos y los usuarios necesarios:
+
+```
+#!/bin/bash
+
+# Actualizar el sistema
+sudo apt update -y && sudo apt upgrade -y
+
+# Instalar MariaDB
+sudo apt install -y mariadb-server
+
+# Configurar MariaDB para aceptar conexiones remotas
+sudo sed -i 's/bind-address.*/bind-address = 0.0.0.0/' /etc/mysql/mariadb.conf.d/50-server.cnf
+
+# Reiniciar MariaDB para aplicar cambios
+sudo systemctl restart mariadb
+
+# Asegurarse de que MariaDB esté habilitado para iniciar al arranque
+sudo systemctl enable mariadb
+
+# Crear la base de datos y el usuario para OwnCloud
+sudo mysql -u root <<EOF
+CREATE DATABASE owncloud_db;
+CREATE USER 'owncloud_user'@'%' IDENTIFIED BY '1234';
+GRANT ALL PRIVILEGES ON owncloud_db.* TO 'owncloud_user'@'%';
+FLUSH PRIVILEGES;
+EOF
+
+# Instalar UFW si no esté instalado
+if ! command -v ufw &> /dev/null; then
+    sudo apt install -y ufw
+fi
+
+# Configuración inicial del firewall: Permitir SSH
+sudo ufw allow ssh
+
+# Establecer políticas predeterminadas para denegar todas las conexiones entrantes y permitir las salientes
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# Permitir el puerto 3306 para MariaDB con persistencia
+sudo ufw allow 3306/tcp
+
+# Habilitar el firewall
+sudo ufw --force enable
+
+# Recargar UFW para aplicar los cambios (opcional)
+sudo ufw reload
+
+```
+
+![image](https://github.com/user-attachments/assets/7c5a8b7f-7ba8-442c-bd1c-c4fc4dc684f6)
+
+### Mostrando la base de datos creada
+
+![image](https://github.com/user-attachments/assets/ec498aad-75e3-490f-8963-f0c2e229a352)
+
+## 5. Configuración de OwnCloud
+
+En OwnCloud realizaremos:
+
+1. Conectar OwnCloud a la base de datos MariaDB.
+2. Configurar el acceso a los archivos compartidos desde el servidor NFS.
+3. Verificar que Nginx esté correctamente configurado para servir OwnCloud.
+4. Realizar pruebas de acceso y funcionamiento desde el balanceador de carga.
+   
+![image](https://github.com/user-attachments/assets/4cce843c-eb77-45ca-996b-ee01927dd1b7)
+
+## 6. Verificación del Funcionamiento
+Para verificar que todo está funcionando correctamente, vamos a realizar los siguientes pasos y captura la salida:
+
+### 1. Mostrar el estado de las máquinas:
+
+```
+vagrant status
+```
+### 2. Hacer un ping entre todas las máquinas:
+
+* Balanceador
+```
+ping 192.168.56.10
+```
+* Serverweb1
+```
+ping 192.168.56.21
+```
+* Serverweb2
+```
+ping 192.168.56.22
+```
+* ServerNFS
+```
+ping 192.168.56.30
+```
+* ServerDB
+```
+ping 192.168.56.40
+```
+
+```
