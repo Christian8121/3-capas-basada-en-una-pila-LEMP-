@@ -472,8 +472,9 @@ Aqui pondremos nuestros datos creado en nuestra base de datos
 
 ![image](https://github.com/user-attachments/assets/5a5b970c-f855-4fd0-8a3f-0a48dcdfb8c4)
 
+### Mostrando dentro de owncloud
 
-
+![IMG-20241215-WA0004](https://github.com/user-attachments/assets/85d70b88-fa53-4478-8de1-92cb1518a2d0)
 
 
 ## 6. Verificación del Funcionamiento
