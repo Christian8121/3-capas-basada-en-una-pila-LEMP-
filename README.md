@@ -476,6 +476,8 @@ Aqui pondremos nuestros datos creado en nuestra base de datos
 
 ![IMG-20241215-WA0004](https://github.com/user-attachments/assets/85d70b88-fa53-4478-8de1-92cb1518a2d0)
 
+![Imagen de WhatsApp 2024-12-16 a las 02 33 16_73bea986](https://github.com/user-attachments/assets/daa24cd2-9611-4f18-810d-1042c6d36fd4)
+
 
 ## 6. Verificación del Funcionamiento
 Para verificar que todo está funcionando correctamente, vamos a realizar los siguientes pasos y captura la salida:
