@@ -19,7 +19,7 @@ En este proyecto, se ha desplegado una infraestructura de alta disponibilidad ut
 * Servidor de Base de Datos MariaDB (Capa 3): 192.168.56.40
 
 ## 2. Infraestructura
-### NOTA: Es importante montar la infraustructura de acorde
+
 La infraestructura está compuesta por tres capas:
 
 * Capa 1 - Balanceador de Carga (Nginx): El balanceador de carga se encarga de distribuir las solicitudes entrantes entre los dos servidores web.
