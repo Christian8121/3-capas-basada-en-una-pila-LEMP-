@@ -452,6 +452,10 @@ sudo ufw reload
 
 ![image](https://github.com/user-attachments/assets/7c5a8b7f-7ba8-442c-bd1c-c4fc4dc684f6)
 
+### Mostrando el estado de mysql
+
+![image](https://github.com/user-attachments/assets/ab300df1-3293-4289-bf97-3e0c4c862477)
+
 ### Mostrando la base de datos creada
 
 ![image](https://github.com/user-attachments/assets/ec498aad-75e3-490f-8963-f0c2e229a352)
@@ -460,12 +464,17 @@ sudo ufw reload
 
 En OwnCloud realizaremos:
 
-1. Conectar OwnCloud a la base de datos MariaDB.
-2. Configurar el acceso a los archivos compartidos desde el servidor NFS.
-3. Verificar que Nginx esté correctamente configurado para servir OwnCloud.
-4. Realizar pruebas de acceso y funcionamiento desde el balanceador de carga.
+Conectar OwnCloud a la base de datos MariaDB.
    
 ![image](https://github.com/user-attachments/assets/4cce843c-eb77-45ca-996b-ee01927dd1b7)
+
+Aqui pondremos nuestros datos creado en nuestra base de datos 
+
+![image](https://github.com/user-attachments/assets/5a5b970c-f855-4fd0-8a3f-0a48dcdfb8c4)
+
+
+
+
 
 ## 6. Verificación del Funcionamiento
 Para verificar que todo está funcionando correctamente, vamos a realizar los siguientes pasos y captura la salida:
@@ -475,6 +484,8 @@ Para verificar que todo está funcionando correctamente, vamos a realizar los si
 ```
 vagrant status
 ```
+![image](https://github.com/user-attachments/assets/22b37fea-508b-47ef-8e16-03084eea52b7)
+
 ### 2. Hacer un ping entre todas las máquinas:
 
 * Balanceador
@@ -497,5 +508,26 @@ ping 192.168.56.30
 ```
 ping 192.168.56.40
 ```
+![image](https://github.com/user-attachments/assets/910583af-6f3b-4ea2-b390-3b1186a08af6)
+![image](https://github.com/user-attachments/assets/de7c4cea-e6f4-4e28-bc90-8757ae22f84e)
+
+
+### 3. Verificar sistemas de archivos montados en los servidores web:
 
 ```
+df -h
+```
+* Server 1
+
+![image](https://github.com/user-attachments/assets/78355f7c-88c8-4b6a-89d9-9bccd50b0400)
+
+* Server 2
+  
+![image](https://github.com/user-attachments/assets/fb565ede-7832-49f5-af45-859b355de184)
+
+### 4. Acceso a la base de datos MariaDB desde los servidores web:
+
+```
+mysql -u ownclouduser -p -h 192.168.56.40 owncloud
+```
+
