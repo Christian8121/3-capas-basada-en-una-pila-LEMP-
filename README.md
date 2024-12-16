@@ -1,4 +1,4 @@
-# 3-capas-basada-en-una-pila-LEMP
+# 3-CAPAS BASADA EN UNA PILA LEMP
 Este trabajo se trata de desplegar un CMS (OwnCloud o Jooma) en una infraestructura en alta disponibilidad de 3 capas basada en una pila LEMP.
 # ÍNDICE
 1. [Introducción](#introducción)
