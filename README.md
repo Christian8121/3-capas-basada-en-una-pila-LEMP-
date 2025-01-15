@@ -18,7 +18,7 @@ En este proyecto, se ha desplegado una infraestructura de alta disponibilidad ut
 * Servidor NFS y PHP-FPM (Capa 2): 192.168.56.30
 * Servidor de Base de Datos MariaDB (Capa 3): 192.168.56.40
 
-## 2. Infraestructura
+## Infraestructura
 
 La infraestructura está compuesta por tres capas:
 
@@ -33,7 +33,7 @@ Servidor MariaDB: Gestiona la base de datos de OwnCloud.
 
 ![Diagrama en blanco (2)](https://github.com/user-attachments/assets/eb3a9431-b25a-439f-ad4d-02f9251e8db6)
 
-## 3. Aprovisionamiento de Máquinas Virtuales
+## Aprovisionamiento de Máquinas Virtuales
 ### Vagrantfile
 El archivo Vagrantfile define las máquinas virtuales y su configuración. Puedes encontrarlo en el directorio raíz del proyecto.
 
@@ -100,7 +100,7 @@ end
 
 ```
 
-## 4. Configuración de la Infraestructura
+## Configuración de la Infraestructura
 A continuación, se detallan los scripts de aprovisionamiento para cada máquina virtual.
 
 ### 1. Balanceador de Carga (Nginx)
@@ -461,7 +461,7 @@ sudo ufw reload
 
 ![image](https://github.com/user-attachments/assets/ec498aad-75e3-490f-8963-f0c2e229a352)
 
-## 5. Configuración de OwnCloud
+## Configuración de OwnCloud
 
 En OwnCloud realizaremos:
 
@@ -480,7 +480,7 @@ Aqui pondremos nuestros datos creado en nuestra base de datos
 ![Imagen de WhatsApp 2024-12-16 a las 02 33 16_73bea986](https://github.com/user-attachments/assets/daa24cd2-9611-4f18-810d-1042c6d36fd4)
 
 
-## 6. Verificación del Funcionamiento
+## Verificación del Funcionamiento
 Para verificar que todo está funcionando correctamente, vamos a realizar los siguientes pasos y captura la salida:
 
 ### 1. Mostrar el estado de las máquinas:
