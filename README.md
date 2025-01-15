@@ -115,7 +115,23 @@ end
 
 1. **Balanceador:** IP pública y privada, configura Nginx para balanceo de carga.
 El balanceador distribuye las solicitudes entre los servidores web. El archivo provision_balanceador.sh configura Nginx para balancear la carga:
-```
+
+2. **Servidores web:** Conectados al balanceador y al almacenamiento NFS.
+Los servidores web configuran Nginx para servir el contenido de OwnCloud desde el directorio compartido por NFS:
+
+3. **Servidor NFS:** Proporciona almacenamiento compartido para los servidores web.
+El servidor NFS permite compartir el directorio de datos entre los servidores web, mientras que PHP-FPM es necesario para ejecutar el CMS:
+
+4. **Base de datos:** Servidor MariaDB con acceso limitado por subred.
+MariaDB se configura en el servidor de base de datos para crear la base de datos y los usuarios necesarios:
+
+---
+
+## Instalación y Configuración
+
+### Configuración del Balanceador de Carga
+
+```bash
 #!/bin/bash
 
 # Actualizar repositorios e instalar nginx
@@ -145,66 +161,41 @@ EOF
 
 # Reiniciar nginx para aplicar cambios
 sudo systemctl restart nginx
-```
-2. **Servidores web:** Conectados al balanceador y al almacenamiento NFS.
-Los servidores web configuran Nginx para servir el contenido de OwnCloud desde el directorio compartido por NFS:
-```
+   ```
+
+### Configuración del Servidor de Base de Datos
+
+```bash
 #!/bin/bash
 
-# Actualizar repositorios e instalar nginx, nfs-common, PHP 7.4 y cliente mariadb
+# Actualizar repositorios e instalar MariaDB
 sudo apt-get update -y
-sudo apt-get install -y nginx nfs-common php7.4 php7.4-fpm php7.4-mysql php7.4-gd php7.4-xml php7.4-mbstring php7.4-curl php7.4-zip php7.4-intl php7.4-ldap mariadb-client
+sudo apt-get install -y mariadb-server
 
-# Crear la carpeta compartida por NFS
-sudo mkdir -p /var/www/html
+# Configurar MariaDB para permitir acceso remoto desde los servidores web
+sed -i 's/bind-address.*/bind-address = 192.168.60.10/' /etc/mysql/mariadb.conf.d/50-server.cnf
 
-# Montar la carpeta desde el servidor NFS
-sudo mount -t nfs 192.168.56.12:/var/www/html /var/www/html
+# Reiniciar MariaDB
+sudo systemctl restart mariadb
 
-# Añadir entrada al /etc/fstab para montaje automático
-echo "192.168.56.12:/var/www/html /var/www/html nfs defaults 0 0" >> /etc/fstab
-
-# Configuración de Nginx para servir OwnCloud
-cat <<EOF > /etc/nginx/sites-available/default
-server {
-    listen 80;
-
-    root /var/www/html/owncloud;
-    index index.php index.html index.htm;
-
-    location / {
-        try_files \$uri \$uri/ /index.php?\$query_string;
-    }
-
-    location ~ \.php\$ {
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass 192.168.56.12:9000;
-        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    location ~ ^/(?:\.htaccess|data|config|db_structure\.xml|README) {
-        deny all;
-    }
-}
+# Crear base de datos y usuario para OwnCloud
+mysql -u root <<EOF
+CREATE DATABASE owncloud;
+CREATE USER 'owncloud'@'192.168.60.%' IDENTIFIED BY '1234';
+GRANT ALL PRIVILEGES ON owncloud.* TO 'owncloud'@'192.168.60.%';
+FLUSH PRIVILEGES;
 EOF
 
-# Verificar la configuración de Nginx
-nginx -t
+#Eliminar puerta de enlace por defecto de Vagrant
+sudo ip route del default 
 
-# Reiniciar Nginx para aplicar los cambios
-sudo systemctl restart nginx
-
-# Reiniciar PHP-FPM 7.4
-sudo systemctl restart php7.4-fpm
-
-# Eliminar puerta de enlace por defecto de Vagrant
-sudo ip route del default
 ```
-3. **Servidor NFS:** Proporciona almacenamiento compartido para los servidores web.
-El servidor NFS permite compartir el directorio de datos entre los servidores web, mientras que PHP-FPM es necesario para ejecutar el CMS:
-```
-#!/bin/bash
+
+### Configuración del Servidor NFS
+Instala el servidor NFS y paquetes necesarios para OwnCloud.
+
+```bash
+  #!/bin/bash
 
 # Actualizar repositorios e instalar NFS y PHP 7.4
 sudo apt-get update -y
@@ -276,130 +267,80 @@ sudo systemctl restart php7.4-fpm
 #Eliminar puerta de enlace por defecto de Vagrant
 sudo ip route del default
 ```
-4. **Base de datos:** Servidor MariaDB con acceso limitado por subred.
-MariaDB se configura en el servidor de base de datos para crear la base de datos y los usuarios necesarios:
 
-```
+### Configuración del Servidores Web
+
+```bash
 #!/bin/bash
 
-# Actualizar repositorios e instalar MariaDB
+# Actualizar repositorios e instalar nginx, nfs-common, PHP 7.4 y cliente mariadb
 sudo apt-get update -y
-sudo apt-get install -y mariadb-server
+sudo apt-get install -y nginx nfs-common php7.4 php7.4-fpm php7.4-mysql php7.4-gd php7.4-xml php7.4-mbstring php7.4-curl php7.4-zip php7.4-intl php7.4-ldap mariadb-client
 
-# Configurar MariaDB para permitir acceso remoto desde los servidores web
-sed -i 's/bind-address.*/bind-address = 192.168.60.10/' /etc/mysql/mariadb.conf.d/50-server.cnf
+# Crear la carpeta compartida por NFS
+sudo mkdir -p /var/www/html
 
-# Reiniciar MariaDB
-sudo systemctl restart mariadb
+# Montar la carpeta desde el servidor NFS
+sudo mount -t nfs 192.168.56.12:/var/www/html /var/www/html
 
-# Crear base de datos y usuario para OwnCloud
-mysql -u root <<EOF
-CREATE DATABASE owncloud;
-CREATE USER 'owncloud'@'192.168.60.%' IDENTIFIED BY '1234';
-GRANT ALL PRIVILEGES ON owncloud.* TO 'owncloud'@'192.168.60.%';
-FLUSH PRIVILEGES;
+# Añadir entrada al /etc/fstab para montaje automático
+echo "192.168.56.12:/var/www/html /var/www/html nfs defaults 0 0" >> /etc/fstab
+
+# Configuración de Nginx para servir OwnCloud
+cat <<EOF > /etc/nginx/sites-available/default
+server {
+    listen 80;
+
+    root /var/www/html/owncloud;
+    index index.php index.html index.htm;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    location ~ \.php\$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass 192.168.56.12:9000;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ ^/(?:\.htaccess|data|config|db_structure\.xml|README) {
+        deny all;
+    }
+}
 EOF
 
-#Eliminar puerta de enlace por defecto de Vagrant
-sudo ip route del default 
-```
----
+# Verificar la configuración de Nginx
+nginx -t
 
-## Instalación y Configuración
+# Reiniciar Nginx para aplicar los cambios
+sudo systemctl restart nginx
 
-### Configuración del Balanceador de Carga
-1. Actualiza e instala Nginx.
-   ```bash
-   sudo apt-get update -y
-   sudo apt-get install -y nginx
-   ```
-2. Configura Nginx para balanceo de carga.
-   ```bash
-   cat <<EOF > /etc/nginx/sites-available/default
-   upstream backend_servers {
-       server 192.168.56.10;
-       server 192.168.56.11;
-   }
+# Reiniciar PHP-FPM 7.4
+sudo systemctl restart php7.4-fpm
 
-   server {
-       listen 80;
-       location / {
-           proxy_pass http://backend_servers;
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-       }
-   }
-   EOF
-   sudo systemctl restart nginx
-   ```
-
-### Configuración del Servidor de Base de Datos
-1. Instala MariaDB y configura la IP de escucha.
-   ```bash
-   sudo apt-get install -y mariadb-server
-   sed -i 's/bind-address.*/bind-address = 192.168.60.10/' /etc/mysql/mariadb.conf.d/50-server.cnf
-   sudo systemctl restart mariadb
-   ```
-2. Crea la base de datos y el usuario para OwnCloud.
-   ```bash
-   mysql -u root <<EOF
-   CREATE DATABASE owncloud;
-   CREATE USER 'owncloud'@'192.168.60.%' IDENTIFIED BY '1234';
-   GRANT ALL PRIVILEGES ON owncloud.* TO 'owncloud'@'192.168.60.%';
-   FLUSH PRIVILEGES;
-   EOF
-   ```
-
-### Configuración del Servidor NFS
-1. Instala el servidor NFS y paquetes necesarios para OwnCloud.
-   ```bash
-   sudo apt-get install -y nfs-kernel-server php7.4 php7.4-fpm ...
-   ```
-2. Configura el almacenamiento compartido.
-   ```bash
-   sudo mkdir -p /var/www/html
-   sudo chown -R www-data:www-data /var/www/html
-   sudo chmod -R 755 /var/www/html
-   echo "/var/www/html 192.168.56.10(rw,sync,no_subtree_check)" >> /etc/exports
-   sudo exportfs -a
-   sudo systemctl restart nfs-kernel-server
-   ```
-
-3. Descarga y configura OwnCloud.
-   ```bash
-   wget https://download.owncloud.com/server/stable/owncloud-10.9.1.zip
-   unzip owncloud-10.9.1.zip
-   mv owncloud /var/www/html/
-   sudo chown -R www-data:www-data /var/www/html/owncloud
-   sudo chmod -R 755 /var/www/html/owncloud
-   ```
-
-4. Crea el archivo de configuración inicial de OwnCloud.
-   ```bash
-   cat <<EOF > /var/www/html/owncloud/config/autoconfig.php
-   <?php
-   $AUTOCONFIG = array(
-       "dbtype" => "mysql",
-       "dbname" => "owncloud",
-       "dbuser" => "owncloud",
-       "dbpassword" => "1234Seve",
-       "dbhost" => "192.168.60.10",
-       "directory" => "/var/www/html/owncloud/data",
-       "adminlogin" => "severino",
-       "adminpass" => "12345678?"
-   );
-   EOF
-   ```
-
+# Eliminar puerta de enlace por defecto de Vagrant
+sudo ip route del default
 ---
 
 ## Despliegue
 1. Ejecuta Vagrant para levantar las máquinas.
    ```bash
    vagrant up
+ ```
+## Despliegue
+1. Ejecuta Vagrant para levantar las máquinas.
+   ```bash
+   vagrant up
    ```
 2. Accede al balanceador y verifica el funcionamiento de OwnCloud desde un navegador.
+1. Abre tu navegador web (por ejemplo, Chrome, Firefox, Edge).
+2. Ingresa la dirección IP del balanceador de carga en la barra de direcciones:
+```
+http://Direción-ip
+```
+Copiar código
 
 ---
 
