@@ -1,6 +1,6 @@
 # 3-CAPAS BASADA EN UNA PILA LEMP
 Este trabajo se trata de desplegar un CMS (OwnCloud o Jooma) en una infraestructura en alta disponibilidad de 3 capas basada en una pila LEMP.
-# ÍNDICE
+## ÍNDICE
 1. [Introducción](#introducción)
 2. [Infraestructura](#infraestructura)
 3. [Aprovisionamiento de Máquinas Virtuales](#aprovisionamiento-de-máquinas-virtuales)
@@ -8,7 +8,7 @@ Este trabajo se trata de desplegar un CMS (OwnCloud o Jooma) en una infraestruct
 5. [Configuración de OwnCloud](#configuración-de-owncloud)
 6. [Verificación del Funcionamiento](#verificación-del-funcionamiento)
 
-## 1. Introducción
+## Introducción
 En este proyecto, se ha desplegado una infraestructura de alta disponibilidad utilizando una arquitectura de tres capas basada en la pila LEMP (Linux, Nginx, MySQL/MariaDB, PHP). El objetivo es implementar el CMS OwnCloud en esta infraestructura, con balanceo de carga entre los servidores web y almacenamiento de archivos compartido a través de NFS.
 
 ### Direccionamiento IP
