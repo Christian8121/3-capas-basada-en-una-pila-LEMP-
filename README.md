@@ -340,7 +340,7 @@ sudo ip route del default
 ```
 http://Direción-ip
 ```
-Copiar código
+![Captura de pantalla 2025-01-15 112808](https://github.com/user-attachments/assets/3fe70bea-1c6d-44b3-85ce-cfcc1a8bfc60)
 
 ---
 
