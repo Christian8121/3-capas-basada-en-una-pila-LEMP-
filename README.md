@@ -341,6 +341,7 @@ sudo ip route del default
 http://Direción-ip
 ```
 ![Captura de pantalla 2025-01-15 112808](https://github.com/user-attachments/assets/3fe70bea-1c6d-44b3-85ce-cfcc1a8bfc60)
+![image](https://github.com/user-attachments/assets/32ca9362-ce15-4f05-80dd-d36422b1a417)
 
 ---
 
