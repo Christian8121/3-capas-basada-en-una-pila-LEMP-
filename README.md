@@ -75,11 +75,15 @@ El archivo Vagrantfile define las máquinas virtuales y su configuración. Puede
 # vi: set ft=ruby :
 Vagrant.configure("2") do |config|
 config.vm.box = "debian/bullseye64"
+
  config.vm.define "BalancerSeve" do |app|
     app.vm.hostname = "BalancerSeve"
     app.vm.network "public_network" 
     app.vm.network "private_network", ip: "192.168.56.2", virtualbox_intnet: "red_balancer_webs"
     app.vm.provision "shell", path: "balanceador.sh"
+# Mapeo de puertos: Acceder a Owncloud desde Windows a través del puerto 8080
+    app.vm.network "forwarded_port", guest: 80, host: 8080
+end
 
  config.vm.define "NFSSeve" do |app|
     app.vm.hostname = "NFSSeve"
@@ -100,7 +104,7 @@ config.vm.define "SGBDDSeve" do |app|
     app.vm.network "private_network", ip: "192.168.56.10", virtualbox_intnet: "red_balancer_webs"
     app.vm.provision "shell", path: "web.sh"
     # Mapeo de puertos: Acceder a Owncloud desde Windows a través del puerto 8080
-    app.vm.network "forwarded_port", guest: 80, host: 8080
+    app.vm.network "forwarded_port", guest: 80, host: 8081
   end
 
   config.vm.define "Web2Seve" do |app|
@@ -109,7 +113,7 @@ config.vm.define "SGBDDSeve" do |app|
     app.vm.network "private_network", ip: "192.168.56.11", virtualbox_intnet: "red_balancer_webs"
     app.vm.provision "shell", path: "web.sh"
     # Mapeo de puertos: Acceder a Owncloud desde Windows a través del puerto 8080
-    app.vm.network "forwarded_port", guest: 80, host: 8080
+    app.vm.network "forwarded_port", guest: 80, host: 8082
   end
 end 
 ```
