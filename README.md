@@ -69,7 +69,8 @@ En este proyecto se implementa un entorno virtualizado para la instalación y co
 ## Vagrantfile
 El archivo Vagrantfile define las máquinas virtuales y su configuración. Puedes encontrarlo en el directorio raíz del proyecto.
 - **Provisión:** Configuración automática mediante scripts.
-```
+
+```bash
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 Vagrant.configure("2") do |config|
