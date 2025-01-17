@@ -342,6 +342,9 @@ http://Direción-ip
 ```
 ![Captura de pantalla 2025-01-15 112808](https://github.com/user-attachments/assets/3fe70bea-1c6d-44b3-85ce-cfcc1a8bfc60)
 ![image](https://github.com/user-attachments/assets/32ca9362-ce15-4f05-80dd-d36422b1a417)
+![image](https://github.com/user-attachments/assets/d604bce1-eeaf-49e4-9007-122ca5d6696d)
+![image](https://github.com/user-attachments/assets/b11ee53d-97dc-486b-ab1e-c8039bf82c31)
+![image](https://github.com/user-attachments/assets/e46eef1f-2cfc-4088-b500-cd48b6dd4925)
 
 ---
 
